@@ -1,7 +1,7 @@
 # SDKMAN Database Migrations
 
 [![Build Status](https://travis-ci.org/sdkman/sdkman-db-migrations.svg?branch=master)](https://travis-ci.org/sdkman/sdkman-db-migrations)
-[![Gitter chat](https://badges.gitter.im/sdkman/cli-dev.png)](https://gitter.im/sdkman/cli-dev)
+[![Slack](https://slack.sdkman.io/badge.svg)](https://slack.sdkman.io)
 
 This enables the users of SDKMAN to contribute new Installation Candidates and related Versions to be served by the API.
 
@@ -11,11 +11,24 @@ This repo uses [mongobee](https://github.com/mongobee/mongobee) as database migr
 
         $ docker run -d --network=host --name=mongo mongo:3.2
 
+**Docker Desktop for Mac**
+
+To connect to MongoDB when using Docker Desktop for Mac you need to forward the port explicitly:
+
+        $ docker run -d -p 27017:27017 --name=mongo mongo:3.2
+
 ## The Build
 
 The build is a standard Gradle build, with migration code written in Scala. To run migrations against your local database, simply run the following:
 
         $ ./gradlew clean run
+
+## Scalafmt
+
+This build uses [scalafmt](https://scalameta.org/scalafmt/) for code formatting, and it is expected that all PRs are compliant.
+Scalafmt will be executed indirectly as a dependency of the `compileScala` task, although it may also be run directly with:
+
+        $ ./gradlew scalafmt
 
 ## The Model
 
@@ -92,17 +105,28 @@ Alternatively, a function is provided on package scope that allows the default v
         
 #### Adding a new Version for multiple platforms
 
-        @ChangeSet(order = "005", id = "005-add_oracle_jdk_10_0_0", author = "marc0der")
+        @ChangeSet(order = "005", id = "005-add_openjdk_10_0_0", author = "marc0der")
           def migrate005(implicit db: MongoDatabase) = {
             List(
-              Version("java", "10.0.0-oracle", "http://download.oracle.com/java/jdk/10/7ea/jdk-10_osx-x64_bin.dmg", MacOSX),
-              Version("java", "10.0.0-oracle", "http://download.oracle.com/java/jdk/10/7ea/jdk-10_linux-x64_bin.tar.gz", Linux),
-              Version("java", "10.0.0-oracle", "http://download.oracle.com/java/jdk/10/7ea/jdk-10_windows-x64_bin.exe", Windows)
+              Version("java", "10.0.0-open", "http://jdk.java.net/java/jdk/10/7ea/jdk-10_osx-x64_bin.dmg", MacOSX),
+              Version("java", "10.0.0-open", "http://jdk.java.net/java/jdk/10/7ea/jdk-10_linux-x64_bin.tar.gz", Linux),
+              Version("java", "10.0.0-open", "http://jdk.java.net/java/jdk/10/7ea/jdk-10_windows-x64_bin.exe", Windows)
             ).validate().insert()
             setCandidateDefault("java", "10.0.0-oracle")
         }
         
 Currently, four platforms identifiers are provided: `Linux`, `Windows`, `MacOSX` and `Universal` as the default.
+
+#### Adding a new Java Version with Vendor
+
+        @ChangeSet(order = "005", id = "005-add_openjdk_10_0_0", author = "marc0der")
+          def migrate005(implicit db: MongoDatabase) =
+            Version("java", "10.0.0-open", "http://jdk.java.net/java/jdk/10/7ea/jdk-10_windows-x64_bin.exe", Windows, Some(OpenJDK))
+                .validate().insert()
+        
+An optional `vendor` field can be set when instantiating a `Version` defaulting to `None`. It can explicitly
+be set to either `None` or a `Some`, in turn containing `AdoptOpenJDK`, `Amazon`, `Graal`, `Liberica`, `OpenJDK`,
+`SAP` or `Zulu` in the case of `Some`. **This field must now be set for all Java Versions** 
 
 #### Adding a new Candidate
 
@@ -125,4 +149,32 @@ Currently, four platforms identifiers are provided: `Linux`, `Windows`, `MacOSX`
 
 ## Fast track
 
-It is usually worth notifying us of the PR on the [cli-dev](https://gitter.im/sdkman/cli-dev) Gitter chat in case we miss your PR.
+It is usually worth notifying us of the PR on [#cli-development](https://slack.sdkman.io) Slack chat in case we miss your PR.
+
+## Contributors
+
+This project exists thanks to all the people who contribute.
+<a href="https://github.com/sdkman/sdkman-cli/graphs/contributors"><img src="https://opencollective.com/sdkman/contributors.svg?width=890&button=false" /></a>
+
+
+## Backers
+
+Thank you to all our backers! [[Become a backer](https://opencollective.com/sdkman#backer)]
+
+<a href="https://opencollective.com/sdkman#backers" target="_blank"><img src="https://opencollective.com/sdkman/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/sdkman#sponsor)]
+
+<a href="https://opencollective.com/sdkman/sponsor/0/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/1/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/2/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/3/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/4/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/5/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/6/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/7/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/8/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/sdkman/sponsor/9/website" target="_blank"><img src="https://opencollective.com/sdkman/sponsor/9/avatar.svg"></a>
